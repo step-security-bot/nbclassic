@@ -17,10 +17,15 @@ jobs:
         group: [check_release, link_check]
       fail-fast: false
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
+        with:
+          egress-policy: audit
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
           python-version: "3.12"
           architecture: "x64"
@@ -29,7 +34,7 @@ jobs:
         run: |
           echo "::set-output name=dir::$(pip cache dir)"
       - name: Cache pip
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
           key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
@@ -38,7 +43,7 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Cache checked links
         if: ${{ matrix.group == 'link_check' }}
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.cache/pytest-link-check
           key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.md', '**/*.rst') }}-md-links
@@ -52,13 +57,13 @@ jobs:
           pip install -e .
       - name: Check Release
         if: ${{ matrix.group == 'check_release' }}
-        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@45ee32c387085d5f1df41da443ade8b952a9dac6 # v2
         with:
           version_spec: 100.100.100
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Link Check
         if: ${{ matrix.group == 'link_check' }}
-        uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/check-links@d5b08e36724fe4271b4751cc0d84c80c2e5c982c # v1
         with:
           ignore_glob: nbclassic/static/components/**/*.md docs-translations/*/*.md
           ignore_links: http://127.0.0.1
