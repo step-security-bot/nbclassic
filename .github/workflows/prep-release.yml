@@ -23,17 +23,25 @@ on:
         description: "Use PRs with activity since the last stable git tag"
         required: false
         type: boolean
+permissions:
+  contents: read
+
 jobs:
   prep_release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+        with:
+          egress-policy: audit
+
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@d5b08e36724fe4271b4751cc0d84c80c2e5c982c # v1
 
       - name: Prep Release
         id: prep-release
-        uses: jupyter-server/jupyter_releaser/.github/actions/prep-release@v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/prep-release@45ee32c387085d5f1df41da443ade8b952a9dac6 # v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: ${{ github.event.inputs.version_spec }}
